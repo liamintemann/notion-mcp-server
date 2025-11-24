@@ -7,19 +7,21 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Railway requires cache IDs to begin with "build-"
-RUN --mount=type=cache,id=build-npm-cache \
+# Railway requires BOTH:
+# 1. id must start with "build-"
+# 2. target must be under /root/.cache/
+RUN --mount=type=cache,id=build-npm-cache,target=/root/.cache/npm \
     npm ci --ignore-scripts --omit=dev
 
 COPY . .
 
-RUN --mount=type=cache,id=build-npm-cache \
+RUN --mount=type=cache,id=build-npm-cache,target=/root/.cache/npm \
     npm run build
 
-RUN --mount=type=cache,id=build-npm-cache \
+RUN --mount=type=cache,id=build-npm-cache,target=/root/.cache/npm \
     npm link
 
-# Runtime image
+# Runtime stage
 FROM node:20-slim
 
 COPY scripts/notion-openapi.json /usr/local/scripts/
