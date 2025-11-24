@@ -11,18 +11,18 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (Railway-compatible cache mount)
-RUN --mount=type=cache,id=cache-npm \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
     npm ci --ignore-scripts --omit=dev
 
 # Copy source code
 COPY . .
 
 # Build the package
-RUN --mount=type=cache,id=cache-npm \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
     npm run build
 
 # Install package globally
-RUN --mount=type=cache,id=cache-npm \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
     npm link
 
 # Minimal image for runtime
