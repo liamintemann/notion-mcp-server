@@ -10,17 +10,20 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --omit-dev
+# Install dependencies (Railway-compatible cache mount)
+RUN --mount=type=cache,id=npm-cache \
+    npm ci --ignore-scripts --omit=dev
 
 # Copy source code
 COPY . .
 
 # Build the package
-RUN --mount=type=cache,target=/root/.npm npm run build
+RUN --mount=type=cache,id=npm-cache \
+    npm run build
 
 # Install package globally
-RUN --mount=type=cache,target=/root/.npm npm link
+RUN --mount=type=cache,id=npm-cache \
+    npm link
 
 # Minimal image for runtime
 FROM node:20-slim
